@@ -27,7 +27,7 @@ jQuery(function ($) {
 		},
 		pluralize: function (count, word) {
 			return count === 1 ? word : word + 's';
-		},
+		}
 		store: function (namespace, data) {
 			if (arguments.length > 1) {
 				return localStorage.setItem(namespace, JSON.stringify(data));
@@ -83,6 +83,14 @@ jQuery(function ($) {
 			});
 
 			$('#footer').toggle(todoCount > 0).html(template);
+		},
+		save: function (namespace, data) {
+			if (arguments.length > 1) {
+				return localStorage.setItem(namespace, JSON.stringify(data));
+			} else {
+				var store = localStorage.getItem(namespace);
+				return (store && JSON.parse(store)) || [];
+			}
 		},
 		toggleAll: function (e) {
 			var isChecked = $(e.target).prop('checked');
