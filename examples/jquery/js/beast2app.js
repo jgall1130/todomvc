@@ -27,20 +27,12 @@ jQuery(function ($) {
 		},
 		pluralize: function (count, word) {
 			return count === 1 ? word : word + 's';
-		},
-		store: function (namespace, data) {
-			if (arguments.length > 1) {
-				return localStorage.setItem(namespace, JSON.stringify(data));
-			} else {
-				var store = localStorage.getItem(namespace);
-				return (store && JSON.parse(store)) || [];
-			}
 		}
 	};
 
 	var App = {
 		init: function () {
-			this.todos = util.store('todos-jquery');
+			this.todos = this.save('todos-jquery');
 			this.todoTemplate = Handlebars.compile($('#todo-template').html());
 			this.footerTemplate = Handlebars.compile($('#footer-template').html());
 			this.bindEvents();
@@ -70,7 +62,6 @@ jQuery(function ($) {
 			$('#toggle-all').prop('checked', this.getActiveTodos().length === 0);
 			this.renderFooter();
 			$('#new-todo').focus();
-			util.store('todos-jquery', this.todos);
 		},
 		renderFooter: function () {
 			var todoCount = this.todos.length;
@@ -84,6 +75,14 @@ jQuery(function ($) {
 
 			$('#footer').toggle(todoCount > 0).html(template);
 		},
+		save: function (namespace, data) {
+			if (arguments.length > 1) {
+				return localStorage.setItem(namespace, JSON.stringify(data));
+			} else {
+				var store = localStorage.getItem(namespace);
+				return (store && JSON.parse(store)) || [];
+			}
+		},
 		toggleAll: function (e) {
 			var isChecked = $(e.target).prop('checked');
 
@@ -91,6 +90,7 @@ jQuery(function ($) {
 				todo.completed = isChecked;
 			});
 
+			this.save('todos-jquery', this.todos);
 			this.render();
 		},
 		getActiveTodos: function () {
@@ -117,6 +117,7 @@ jQuery(function ($) {
 		destroyCompleted: function () {
 			this.todos = this.getActiveTodos();
 			this.filter = 'all';
+			this.save('todos-jquery', this.todos);
 			this.render();
 		},
 		// accepts an element from inside the `.item` div and
@@ -147,12 +148,14 @@ jQuery(function ($) {
 			});
 
 			$input.val('');
-
+			
+			this.save('todos-jquery', this.todos);
 			this.render();
 		},
 		toggle: function (e) {
 			var i = this.indexFromEl(e.target);
 			this.todos[i].completed = !this.todos[i].completed;
+			this.save('todos-jquery', this.todos);
 			this.render();
 		},
 		edit: function (e) {
@@ -184,10 +187,12 @@ jQuery(function ($) {
 				this.todos[this.indexFromEl(el)].title = val;
 			}
 
+			this.save('todos-jquery', this.todos);
 			this.render();
 		},
 		destroy: function (e) {
 			this.todos.splice(this.indexFromEl(e.target), 1);
+			this.save('todos-jquery', this.todos);
 			this.render();
 		}
 	};
